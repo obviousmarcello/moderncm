@@ -57,6 +57,10 @@ export interface Content {
     sent: string;
     sentBody: string;
     sendAnother: string;
+    submitMail: string;
+    sentMail: string;
+    sentMailBody: string;
+    mailSubject: string;
     errors: { required: string; invalid: string; network: string };
   };
   footer: { line: string; rights: string };
@@ -173,6 +177,10 @@ const hu: Content = {
     sent: 'Megkaptam az ajánlatkérést.',
     sentBody: 'Két munkanapon belül válaszolok a megadott e-mail címre.',
     sendAnother: 'Új ajánlatkérés',
+    submitMail: 'Ajánlatkérés megnyitása e-mailben',
+    sentMail: 'Megnyitottam az e-mail programját.',
+    sentMailBody: 'Az ajánlatkérés akkor érkezik meg, ha elküldi a megnyitott e-mailt. Ha nem nyílt meg semmi, írjon közvetlenül a lent látható címre.',
+    mailSubject: 'Ajánlatkérés',
     errors: {
       required: 'Ezt a mezőt ki kell tölteni.',
       invalid: 'Ellenőrizze ezt a mezőt.',
@@ -292,6 +300,10 @@ const en: Content = {
     sent: 'Your request is in.',
     sentBody: 'I will reply to the email address you gave within two working days.',
     sendAnother: 'Send another request',
+    submitMail: 'Open request in email',
+    sentMail: 'Your email app is open.',
+    sentMailBody: 'Your request reaches me once you send that email. If nothing opened, write to the address below.',
+    mailSubject: 'Wedding MC request',
     errors: {
       required: 'Please fill in this field.',
       invalid: 'Please check this field.',

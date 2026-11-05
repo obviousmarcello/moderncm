@@ -10,9 +10,15 @@ interface Props {
 }
 
 type Errors = Partial<Record<'names' | 'email' | 'date' | 'guests' | 'language', 'required' | 'invalid'>>;
-type Status = 'idle' | 'sending' | 'sent' | 'network';
+type Status = 'idle' | 'sending' | 'sent' | 'mailed' | 'network';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Static hosting (e.g. GitHub Pages) has no API. When a contact address is
+ * configured at build time, the form opens a pre-filled email instead.
+ */
+const CONTACT_EMAIL = (import.meta.env.VITE_CONTACT_EMAIL as string | undefined)?.trim() || '';
 
 export function InquiryForm({ date, packageId, onDateChange }: Props) {
   const { t } = useLanguage();
@@ -54,6 +60,23 @@ export function InquiryForm({ date, packageId, onDateChange }: Props) {
       return;
     }
 
+    if (CONTACT_EMAIL) {
+      const lines = [
+        `${f.names}: ${payload.names}`,
+        `${f.email}: ${payload.email}`,
+        `${f.date}: ${payload.date}`,
+        payload.venue && `${f.venue}: ${payload.venue}`,
+        payload.guests && `${f.guests}: ${payload.guests}`,
+        `${f.language} ${f.languageOptions[payload.language]}`,
+        payload.package && `${t.packages.title}: ${t.packages.items.find((p) => p.id === payload.package)?.name ?? payload.package}`,
+        payload.message && `\n${payload.message}`,
+      ].filter(Boolean);
+      const subject = `${f.mailSubject}: ${payload.date}, ${payload.names}`;
+      window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+      setStatus('mailed');
+      return;
+    }
+
     setStatus('sending');
     try {
       await api.post('/inquiries', payload);
@@ -83,10 +106,15 @@ export function InquiryForm({ date, packageId, onDateChange }: Props) {
         <p>{f.intro}</p>
       </div>
 
-      {status === 'sent' ? (
+      {status === 'sent' || status === 'mailed' ? (
         <div className="enquire__done" role="status">
-          <p className="enquire__done-title">{f.sent}</p>
-          <p>{f.sentBody}</p>
+          <p className="enquire__done-title">{status === 'mailed' ? f.sentMail : f.sent}</p>
+          <p>{status === 'mailed' ? f.sentMailBody : f.sentBody}</p>
+          {status === 'mailed' && (
+            <p>
+              <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            </p>
+          )}
           <button type="button" className="button button--outline" onClick={() => setStatus('idle')}>
             {f.sendAnother}
           </button>
@@ -145,7 +173,7 @@ export function InquiryForm({ date, packageId, onDateChange }: Props) {
           )}
           <div className="field--wide">
             <button className="button" type="submit" disabled={status === 'sending'}>
-              {status === 'sending' ? f.sending : f.submit}
+              {status === 'sending' ? f.sending : CONTACT_EMAIL ? f.submitMail : f.submit}
             </button>
           </div>
         </form>
