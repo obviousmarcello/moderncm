@@ -41,3 +41,11 @@ npm run dev:ui        # http://localhost:5173 (proxies /api to the backend)
 ```
 
 Copy `backend/.env.example` to `backend/.env` to override defaults.
+
+## The site
+
+`ui/` is a bilingual (Hungarian / English) landing page for a wedding master of ceremonies:
+
+- All copy lives in `ui/src/i18n/content.ts`, with one dictionary per language. The language toggle in the header saves the choice and sets `<html lang>`.
+- `freeSaturdays` and the reviews in `content.ts` are placeholders. Replace them with real data before going live.
+- The enquiry form posts to `POST /api/inquiries` (validated in `backend/src/services/inquiry.service.ts`). Enquiries are kept in memory for now, so add a database or an email notification before production.
