@@ -1,0 +1,54 @@
+name: Deploy to GitHub Pages
+
+# Publishes the UI as a static site whenever the default branch changes.
+# Run it by hand from the Actions tab to deploy any other branch.
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - id: pages
+        uses: actions/configure-pages@v5
+      - name: Build UI
+        run: npm run build -w ui
+        env:
+          # e.g. /moderncm/ for a project site, / for a custom domain
+          VITE_BASE: ${{ steps.pages.outputs.base_path }}/
+          # Pages has no API, so the enquiry form sends an email to this address.
+          # Set it under Settings → Secrets and variables → Actions → Variables.
+          VITE_CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+      - name: Warn when no contact email is set
+        if: vars.CONTACT_EMAIL == ''
+        run: echo "::warning::CONTACT_EMAIL repository variable is not set, so the enquiry form on the deployed site cannot send anything."
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ui/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
