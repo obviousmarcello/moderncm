@@ -1,0 +1,9 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+body { margin: 0; }
+.layout__header { padding: 1rem 1.5rem; font-weight: 600; border-bottom: 1px solid #e5e5e5; }
+.layout__main { padding: 1.5rem; }
+.error { color: #c0392b; }

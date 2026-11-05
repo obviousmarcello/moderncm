@@ -1,0 +1,11 @@
+{
+  "name": "moderncm",
+  "private": true,
+  "workspaces": ["backend", "ui"],
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "dev:ui": "npm run dev -w ui",
+    "build": "npm run build -w backend && npm run build -w ui",
+    "test": "npm test -w backend"
+  }
+}
